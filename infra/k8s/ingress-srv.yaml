@@ -4,15 +4,41 @@ metadata:
   name: ingress-srv
   labels:
     name: ingress-srv
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   rules:
   - host: posts.com
     http:
       paths:
-      - pathType: Prefix
-        path: /posts
+      - path: /posts/create
+        pathType: Exact
         backend:
           service:
             name: posts-clusterip-srv
-            port: 
+            port:
               number: 4000
+
+      - path: /posts/(.*)/comments
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: comments-clusterip-srv
+            port:
+              number: 4001
+
+      - path: /posts
+        pathType: Exact
+        backend:
+          service:
+            name: query-clusterip-srv
+            port:
+              number: 4002
+
+      - path: /.*
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: client-clusterip-srv
+            port:
+              number: 3000
